@@ -1,0 +1,8 @@
+OSX
+dnf insert_package
+
+Linux
+npm install
+
+Windows
+npm install
