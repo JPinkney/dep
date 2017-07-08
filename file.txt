@@ -1,5 +1,7 @@
 OSX
-dnf insert_package
+npm install
+npm install
+
 
 Linux
 npm install
