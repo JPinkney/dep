@@ -9,49 +9,79 @@ LINUX_OS = "Linux"
 WINDOWS_OS = "Windows"
 OTHER_OS = "Other"
 
-COMMAND_LIST = [MAC_OS, LINUX_OS, WINDOWS_OS, OTHER_OS]
-json_output = {}
+OS_LIST = [MAC_OS, LINUX_OS, WINDOWS_OS, OTHER_OS]
+file_info_dict = {}
 
-def setup_file():
+def file_to_dict():
+	"""Turn dependency.dep file into python dictionary
+
+    Returns:
+        dependency.dep in a python dictionary
+    """
+
 	setup_file_if_not_exists()
 
-	#This is currently running to the end
 	with open('dependency.dep', 'r') as f:
-		#File is open and we are reading it
 		lines = f.readlines()
 
 		last_cmd = ""
 		for line in lines:
-			#Check for the the OS at that location
+
 			input_token = line.strip()
-			if check_for_header(input_token):
-				last_cmd = input_token
-				json_output[last_cmd] = []
+
+			if check_for_os_header(input_token):
+				last_command = input_token
+				file_info_dict[last_command] = []
+
 			else:
-				if not (last_cmd == "" or input_token == ""):
+
+				if not (last_command  == "" or input_token == ""):
 					split_line = line.split(" ")
 					package_manager = split_line[0].strip()
 					dependency = split_line[1].strip()
-					json_output[last_cmd].append({
+					file_info_dict[last_command].append({
 						"packagemanager": package_manager,
 						"dependency": dependency,
 						"install": input_token
 					})
-		return json_output
+
+		return file_info_dict
 		
 
-def check_for_header(input_str):
-	for command in COMMAND_LIST:
+def check_for_os_header(input_str):
+	"""Check if input_str is a valid supported OS
+
+    Args:
+        input_str: the name of an os.
+    Returns:
+        True if input_str is a valid supported OS otherwise False
+    """
+
+	for command in OS_LIST:
 		if input_str.lower() == command.lower():
 			return True
 	return False
 
 def install_dependencies(depencencies_for_os):
+	"""Install all depencies listed in depencencies_for_os
+
+    Args:
+        depencencies_for_os: a python dictionary of dependencies to install
+    """
+
 	for install_item in depencencies_for_os:
 		if is_package_manager_found(install_item["packagemanager"]):
 			install_dependency(install_item["install"])
 
 def is_package_manager_found(package_manager):
+	"""Check if package_manager is found on the system
+
+    Args:
+        package_manager: the name of the package manager to check for
+    Returns:
+        True if the package manager is one the system otherwise False
+    """
+
 	try:
 		p = subprocess.Popen(package_manager, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 	except:
@@ -60,6 +90,12 @@ def is_package_manager_found(package_manager):
 	return True
 
 def install_dependency(depencency):
+	"""Install the specific dependency
+
+    Args:
+        depencency: the dependency you want to install.
+    """
+
 	try:
 		print("Installing dependency: " + depencency)
 		p = subprocess.Popen(depencency, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
@@ -71,19 +107,25 @@ def install_dependency(depencency):
 		print("Installing dependency: " + depencency + " failed")
 
 def setup_file_if_not_exists():
+	"""Setup the file if it does not exist"""
+
 	if not os.path.isfile('dependency.dep'):
 		setup_file_even_if_exists()
 
 def setup_file_even_if_exists():
+	"""Setup the file with correct OS headers"""
+
 	with open('dependency.dep', "w+") as f:
 		f.write("OSX\n\n")
 		f.write("Linux\n\n")
 		f.write("Windows\n\n")
 		f.write("Other\n")
 
-def setup(sys_input):
+def check_inputs(sys_input):
+	"""Run the program based off of sys_input"""
+
 	if len(sys_input) != 2:
-		print("Installing depencies failed")
+		print("Invalid number of parameters")
 		exit(0)
 	
 	first_cmd = sys_input[0]
@@ -92,20 +134,22 @@ def setup(sys_input):
 	if second_cmd == "init":
 		setup_file_if_not_exists()
 	elif second_cmd == "run":
-		setup_run()
+		main_dependency_installer()
 	elif second_cmd == "reset":
 		setup_file_even_if_exists()
 	else:
-		print("Blah blah I do not remember")
+		print("Invalid command. Available commands are init, run, and reset")
 
-def setup_run():
+def main_dependency_installer():
+	"""Calcuates and installs all the depencies from dependecy.dep"""
+
 	current_os = platform.system()
 	if current_os == "Darwin":
 		current_os = "OSX"
-	depencencies_json = setup_file()
+	depencencies_json = file_to_dict()
 	depencencies_for_os = depencencies_json[current_os]
 	print("Installing depencies for " + current_os)
 	install_dependencies(depencencies_for_os)
 
 if __name__ == '__main__':
-	setup(sys.argv)
+	check_inputs(sys.argv)
