@@ -18,9 +18,11 @@
     ```
 3. Use the run command to install dependencies for this computer
 
-##### Available commands
+### Available commands
 init - Initilizes the file for the first time (optional as run with automatically initilze it if you haven't already)
+
 run - Run the platform dependent depencies for the specific platform. Will also create the file if it does not exist
+
 reset - Reset the dependecy.dep or create it if it doesn't exist
 
 ### Additional Support
