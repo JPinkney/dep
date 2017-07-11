@@ -1,9 +1,9 @@
-### Dep - Platform dependent depencies
+### Dep - Platform dependent depency installer
 
 ### How to use
 
 1. First use either init, run, or reset. Either one of these will create the dependecy.dep file.
-2. Added the platform specific dependency under the correct operating system header
+2. Add the platform specific dependency under the correct operating system header in the generated dependecy.dep file
     E.g. 
     ```
     OSX
